@@ -89,7 +89,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('auth/refresh')
+  @Post('/refresh')
   async refreshToken(
     @Body() data: RefreshTokenDto,
   ): Promise<RefreshTokenResponse> {
