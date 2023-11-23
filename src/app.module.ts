@@ -3,9 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { ClientsModule } from './clients/clients.module';
-import { TransactionsModule } from './transactions/transactions.module';
-import { NotificationsModule } from './notifications/notifications.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthGoogleModule } from './auth-google/auth-google.module';
 import configuration from './config/configuration';
@@ -35,9 +32,6 @@ import configuration from './config/configuration';
     }),
     UsersModule,
     AuthModule,
-    ClientsModule,
-    TransactionsModule,
-    NotificationsModule,
     DatabaseModule,
     AuthGoogleModule,
   ],
