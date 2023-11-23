@@ -10,7 +10,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID: configService.get<string>('google_client_id'),
       clientSecret: configService.get<string>('google_client_secret'),
-      callbackURL: 'http://localhost:3000/google/redirect',
+      callbackURL: 'https://smooth-transact-api.onrender.com/google/redirect',
       scope: ['email', 'profile'],
     });
   }
