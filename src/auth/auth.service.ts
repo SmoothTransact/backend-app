@@ -1,7 +1,6 @@
 import * as cookie from 'cookie';
 import * as bcrypt from 'bcrypt';
 import { totp } from 'otplib';
-import RedisClient from '../utils/redis';
 import {
   ConflictException,
   Injectable,
@@ -12,19 +11,21 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
+import { RedisRepository } from '../redis/repository/redis.repository';
 import { Payload } from './auth.type';
 import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   totp: typeof totp;
-  cache: RedisClient;
+  cache: RedisRepository;
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private redisRepository: RedisRepository,
   ) {
-    this.cache = new RedisClient();
+    this.cache = redisRepository;
     this.totp = totp;
     this.totp.options = { digits: 6, step: 300 };
   }
@@ -79,7 +80,7 @@ export class AuthService {
     if (await this.cache.exists(otpKey)) {
       await this.cache.del(otpKey);
     }
-    await this.cache.set(otpKey, otp, 300);
+    await this.cache.setWithExpiry(otpKey, otp, 600);
 
     return { otp };
   }

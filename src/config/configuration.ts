@@ -7,6 +7,8 @@ export default () => ({
   google_client_id: process.env.GOOGLE_CLIENT_ID,
   google_client_secret: process.env.GOOGLE_SECRET,
   mailgun_api_key: process.env.MAILGUN_API_KEY,
+  redis_host: process.env.REDIS_HOST,
+  redis_port: process.env.REDIS_PORT,
   http: {
     host: process.env.HTTP_HOST || 'localhost',
     port: parseInt(process.env.HTTP_PORT, 10) || 3000,
