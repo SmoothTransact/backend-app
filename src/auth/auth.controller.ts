@@ -7,6 +7,7 @@ import {
   Request,
   HttpStatus,
   UseGuards,
+  Get,
   HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -24,6 +25,7 @@ import {
   ForgotPasswordResponse,
   ResetPasswordResponse,
 } from './auth.type';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
@@ -74,6 +76,16 @@ export class AuthController {
     return {
       message: 'Reset password successfully, signin with your new password.',
     };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @Get('/signout')
+  async signout(@Request() req: any) {
+    const token = req.headers?.authorization?.split(' ')[1];
+    await this.authService.signout(req.user, token);
+    req.res.setHeader('Authorization', null);
+    return { message: 'Signout successfully' };
   }
 
   @HttpCode(HttpStatus.OK)

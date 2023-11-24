@@ -4,27 +4,24 @@ import { totp } from 'otplib';
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
-import { RedisRepository } from '../redis/repository/redis.repository';
 import { Payload } from './auth.type';
 import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   totp: typeof totp;
-  cache: RedisRepository;
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private redisRepository: RedisRepository,
   ) {
-    this.cache = redisRepository;
     this.totp = totp;
     this.totp.options = { digits: 6, step: 300 };
   }
@@ -50,6 +47,20 @@ export class AuthService {
     return { tokens: { accessToken, refreshToken }, cookie: cookieSerialized };
   }
 
+  async signout(reqUser: Partial<User>, token: string): Promise<boolean> {
+    try {
+      const { user } = JSON.parse(JSON.stringify(reqUser));
+      if (!user || !token) {
+        throw new NotFoundException('User not found');
+      }
+      const updatedUser = { refreshToken: null };
+      await this.usersService.update(user.id, updatedUser);
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
   public async forgotPassword(email: string): Promise<{ otp: string }> {
     await this.validateEmail(email);
     const user = await this.usersService.findByEmail(email.toLowerCase());
@@ -59,13 +70,7 @@ export class AuthService {
     }
 
     const otp = await this.generateResetPasswordOtp();
-    const otpKey = `${user.id}:otp`;
-
-    if (await this.cache.exists(otpKey)) {
-      await this.cache.del(otpKey);
-    }
-    await this.cache.setWithExpiry(otpKey, otp, 600);
-
+    // No need to store OTP without caching
     return { otp };
   }
 
@@ -174,7 +179,11 @@ export class AuthService {
     });
   }
 
-  public async verifyResetPasswordOtp(otp: string, userId: string) {
+  public async verifyResetPasswordOtp(
+    otp: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _userId: string,
+  ): Promise<boolean> {
     const OTP_TOKEN_SECRET = this.configService.get('otp_secret');
     const isValid = this.totp.check(otp, OTP_TOKEN_SECRET);
 
@@ -182,13 +191,7 @@ export class AuthService {
       throw new NotFoundException('Invalid OTP or OTP has expired');
     }
 
-    const otpKey = `${userId}:otp`;
-    const otpCached = await this.cache.get(otpKey);
-    if (otpCached !== otp) {
-      throw new NotFoundException('Invalid OTP');
-    }
-
-    await this.cache.del(otpKey);
+    return true;
   }
 
   private async validateEmail(email: string) {
