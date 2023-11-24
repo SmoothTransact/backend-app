@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthGoogleModule } from './auth-google/auth-google.module';
-import { RedisModule } from './redis/redis.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -35,7 +34,6 @@ import configuration from './config/configuration';
     AuthModule,
     DatabaseModule,
     AuthGoogleModule,
-    RedisModule,
   ],
 })
 export class AppModule {}
