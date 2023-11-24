@@ -5,10 +5,13 @@ import { Redis } from 'ioredis';
 export const redisClientFactory: FactoryProvider<Redis> = {
   provide: 'RedisClient',
   useFactory: async (configService: ConfigService) => {
-    const redisInstance = new Redis({
-      host: configService.get<string>('redis_host'),
-      port: configService.get<number>('redis_port'),
-    });
+    const redisUrl = configService.get<string>('redis_url');
+
+    if (!redisUrl) {
+      throw new Error('Redis URL not provided in the configuration');
+    }
+
+    const redisInstance = new Redis(redisUrl);
 
     redisInstance.on('error', (e) => {
       throw new Error(`Redis connection failed: ${e}`);

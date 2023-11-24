@@ -9,6 +9,7 @@ export default () => ({
   mailgun_api_key: process.env.MAILGUN_API_KEY,
   redis_host: process.env.REDIS_HOST,
   redis_port: process.env.REDIS_PORT,
+  redis_url: process.env.REDIS_URL,
   http: {
     host: process.env.HTTP_HOST || 'localhost',
     port: parseInt(process.env.HTTP_PORT, 10) || 3000,
