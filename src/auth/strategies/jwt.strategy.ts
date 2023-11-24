@@ -5,11 +5,9 @@ import { ConfigService } from '@nestjs/config';
 import { Payload } from '../auth.type';
 import { UsersService } from 'src/users/users.service';
 import { Request } from 'express';
-import RedisClient from 'src/utils/redis';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  cache: RedisClient;
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,
@@ -21,18 +19,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       passReqToCallback: true,
     });
-    this.cache = new RedisClient();
   }
 
   async validate(req: Request, payload: Payload) {
     const token = req?.get('authorization')?.split(' ')[1];
-    const isRevoked = await this.cache.sismember('revokedToken', token);
-    if (isRevoked)
+    if (token === null) {
       throw new UnauthorizedException('Token revoked, login again');
+    }
 
     const user = await this.usersService.findOne(payload?.sub);
-    if (!user) throw new UnauthorizedException();
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
     user.refreshToken = undefined;
+
     return { user };
   }
 }
