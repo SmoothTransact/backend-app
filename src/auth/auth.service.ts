@@ -4,7 +4,6 @@ import { totp } from 'otplib';
 import {
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -49,21 +48,6 @@ export class AuthService {
     const cookieSerialized = this.setCookies(accessToken);
     await this.setCurrentRefreshToken(refreshToken, user.id);
     return { tokens: { accessToken, refreshToken }, cookie: cookieSerialized };
-  }
-
-  async signout(reqUser: Partial<User>, token: string) {
-    try {
-      const { user } = JSON.parse(JSON.stringify(reqUser));
-      if (!user || !token) {
-        throw new NotFoundException('User not found');
-      }
-      const updatedUser = { refreshToken: null };
-      await this.usersService.update(user.id, updatedUser);
-      await this.revokeToken(token);
-      return true;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
   }
 
   public async forgotPassword(email: string): Promise<{ otp: string }> {
@@ -147,14 +131,6 @@ export class AuthService {
     } catch (error) {
       throw new NotFoundException('Invalid token');
     }
-  }
-
-  async revokeToken(tokenId: string) {
-    await this.cache.sadd('revokedToken', tokenId);
-  }
-
-  async isTokenRevoked(tokenId: string) {
-    return await this.cache.sismember('revokedToken', tokenId);
   }
 
   getTokenOption(type: string): JwtSignOptions {
