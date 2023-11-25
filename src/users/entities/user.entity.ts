@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Roles, ROLES } from '../types/user.types';
+import { ClientProfile } from 'src/clients/entities/client.entity';
 
 @Entity()
 export class User {
@@ -26,6 +28,11 @@ export class User {
 
   @Column({ nullable: true })
   refreshToken?: string;
+
+  @OneToMany(() => ClientProfile, (clientProfile) => clientProfile.user, {
+    cascade: true,
+  })
+  clientProfiles: ClientProfile[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

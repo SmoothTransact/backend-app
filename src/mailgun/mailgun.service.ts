@@ -45,7 +45,10 @@ export class MailgunService {
     const emailHtml = mailGenerator.generate(emailContent);
 
     const formData = new FormData();
-    formData.append('from', 'Ahmed from Smooth Transact <contact@ahmedolawale.me>');
+    formData.append(
+      'from',
+      'Ahmed from Smooth Transact <contact@ahmedolawale.me>',
+    );
     formData.append('to', to);
     formData.append('subject', 'Welcome to Smooth Transact');
     formData.append('html', emailHtml);
@@ -78,7 +81,8 @@ export class MailgunService {
     const emailContent = {
       body: {
         name: username,
-        intro: 'You have received this email because a password reset request for your account was received.',
+        intro:
+          'You have received this email because a password reset request for your account was received.',
         action: {
           instructions: 'Enter the OTP below to reset your password:',
           button: {
@@ -87,14 +91,18 @@ export class MailgunService {
             link: '',
           },
         },
-        outro: 'If you did not request a password reset, no further action is required on your part.',
+        outro:
+          'If you did not request a password reset, no further action is required on your part.',
       },
     };
 
     const emailHtml = mailGenerator.generate(emailContent);
 
     const formData = new FormData();
-    formData.append('from', 'Ahmed from Smooth Transact <contact@ahmedolawale.me>');
+    formData.append(
+      'from',
+      'Ahmed from Smooth Transact <contact@ahmedolawale.me>',
+    );
     formData.append('to', to);
     formData.append('subject', 'Password Reset Request from Smooth Transact');
     formData.append('html', emailHtml);

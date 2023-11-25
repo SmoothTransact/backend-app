@@ -4,6 +4,6 @@ import { MailgunService } from './mailgun.service';
 @Module({
   providers: [MailgunService],
   controllers: [],
-  exports: [MailgunService]
+  exports: [MailgunService],
 })
 export class MailgunModule {}
