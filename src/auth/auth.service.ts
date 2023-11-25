@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
+import { MailgunService } from '../mailgun/mailgun.service';
 import { Payload } from './auth.type';
 import { User } from '../users/entities/user.entity';
 
@@ -19,6 +20,7 @@ export class AuthService {
   totp: typeof totp;
   constructor(
     private usersService: UsersService,
+    private mailgunService: MailgunService,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {
@@ -36,6 +38,8 @@ export class AuthService {
     user.password = await this.hashPassword(user.password);
     const newUser = await this.usersService.create(user);
     newUser.password = undefined;
+
+    await this.mailgunService.sendWelcomeEmail(newUser.email, newUser.fullName || '')
 
     return newUser;
   }
@@ -70,7 +74,8 @@ export class AuthService {
     }
 
     const otp = await this.generateResetPasswordOtp();
-    // No need to store OTP without caching
+    await this.mailgunService.sendPasswordResetEmail(user.email, user.fullName, otp)
+
     return { otp };
   }
 
@@ -81,6 +86,8 @@ export class AuthService {
     await this.verifyResetPasswordOtp(otp, user.id);
 
     const updatedUser = { password: await this.hashPassword(newPassword) };
+
+    otp = null;
     return await this.usersService.update(user.id, updatedUser);
   }
 
