@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthGoogleModule } from './auth-google/auth-google.module';
 import { MailgunModule } from './mailgun/mailgun.module';
+import { ClientsModule } from './clients/clients.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -36,6 +37,7 @@ import configuration from './config/configuration';
     DatabaseModule,
     AuthGoogleModule,
     MailgunModule,
+    ClientsModule,
   ],
 })
 export class AppModule {}

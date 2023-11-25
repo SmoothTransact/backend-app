@@ -39,7 +39,10 @@ export class AuthService {
     const newUser = await this.usersService.create(user);
     newUser.password = undefined;
 
-    await this.mailgunService.sendWelcomeEmail(newUser.email, newUser.fullName || '')
+    await this.mailgunService.sendWelcomeEmail(
+      newUser.email,
+      newUser.fullName || '',
+    );
 
     return newUser;
   }
@@ -74,7 +77,11 @@ export class AuthService {
     }
 
     const otp = await this.generateResetPasswordOtp();
-    await this.mailgunService.sendPasswordResetEmail(user.email, user.fullName, otp)
+    await this.mailgunService.sendPasswordResetEmail(
+      user.email,
+      user.fullName,
+      otp,
+    );
 
     return { otp };
   }
