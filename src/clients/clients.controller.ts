@@ -8,6 +8,8 @@ import {
   ParseUUIDPipe,
   Param,
   NotFoundException,
+  Patch,
+  Delete,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
@@ -64,5 +66,31 @@ export class ClientsController {
     }
 
     return client;
+  }
+
+  @Patch(':id')
+  async editClientProfile(
+    @Param('id', new ParseUUIDPipe()) clientId: string,
+    @Body() updateClientProfileDto: CreateClientProfileDto,
+  ): Promise<ClientProfile> {
+    const updatedClient = await this.clientsService.editClientProfile(
+      clientId,
+      updateClientProfileDto,
+    );
+
+    if (!updatedClient) {
+      throw new NotFoundException('Client not found');
+    }
+
+    return updatedClient;
+  }
+
+  @Delete(':id')
+  async deleteClientProfile(
+    @Param('id', new ParseUUIDPipe()) clientId: string,
+  ): Promise<void> {
+    await this.clientsService.deleteClientProfile(clientId);
+
+    return null;
   }
 }
