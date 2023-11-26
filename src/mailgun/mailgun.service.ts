@@ -1,27 +1,36 @@
 // mailgun.service.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
-import * as FormData from 'form-data';
+import * as nodemailer from 'nodemailer';
 import * as Mailgen from 'mailgen';
 
 @Injectable()
 export class MailgunService {
-  private readonly apiKey: string;
-  private readonly domain: string;
+  private readonly user: string;
+  private readonly pass: string;
 
   constructor(private configService: ConfigService) {
-    this.apiKey = configService.get<string>('mailgun_api_key');
-    this.domain = configService.get<string>('mailgun_domain');
+    // this.apiKey = configService.get<string>('mailgun_api_key');
+    this.user = configService.get<string>('mailgun_user');
+    this.pass = configService.get<string>('mailgun_password');
   }
 
   async sendWelcomeEmail(to: string, username: string) {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.mailgun.org',
+      port: 587,
+      auth: {
+        user: this.user,
+        pass: this.pass,
+      },
+    });
+
     const mailGenerator = new Mailgen({
       theme: 'default',
       product: {
         name: 'Smooth Transact',
-        link: 'https://smooth-transact.vercel.app',
-        logo: 'https://github.com/ayobamy/chatbot-api/assets/59466195/fe4794a6-c205-4262-84b7-314410ca747a',
+        link: 'https://smooth-transact.netlify.app',
+        logo: './../src/mailgun/assets/Logo.png',
       },
     });
 
@@ -34,7 +43,7 @@ export class MailgunService {
           button: {
             color: '#0096FF',
             text: 'Sign in',
-            link: 'https://smooth-transact.vercel.app/auth/login',
+            link: 'https://smooth-transact.netlify.app/auth/login',
           },
         },
         outro:
@@ -44,37 +53,33 @@ export class MailgunService {
 
     const emailHtml = mailGenerator.generate(emailContent);
 
-    const formData = new FormData();
-    formData.append(
-      'from',
-      'Ahmed from Smooth Transact <contact@ahmedolawale.me>',
-    );
-    formData.append('to', to);
-    formData.append('subject', 'Welcome to Smooth Transact');
-    formData.append('html', emailHtml);
+    const mailOptions = {
+      from: 'Ahmed from Smooth Transact <contact@ahmedolawale.me>',
+      to: to,
+      subject: 'Welcome to Smooth Transact',
+      html: emailHtml,
+    };
 
-    const response = await axios.post(
-      `https://api.mailgun.net/v3/${this.domain}/messages`,
-      formData,
-      {
-        auth: {
-          username: 'api',
-          password: this.apiKey,
-        },
-        headers: formData.getHeaders(),
-      },
-    );
-
-    return response.data;
+    const info = await transporter.sendMail(mailOptions);
+    return info.response;
   }
 
   async sendPasswordResetEmail(to: string, username: string, otp: string) {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.mailgun.org',
+      port: 587,
+      auth: {
+        user: this.user,
+        pass: this.pass,
+      },
+    });
+
     const mailGenerator = new Mailgen({
       theme: 'default',
       product: {
         name: 'Smooth Transact',
-        link: 'https://smooth-transact.vercel.app',
-        logo: 'https://github.com/ayobamy/chatbot-api/assets/59466195/fe4794a6-c205-4262-84b7-314410ca747a',
+        link: 'https://smooth-transact.netlify.app',
+        logo: '../../src/mailgun/assets/Logo.png',
       },
     });
 
@@ -98,27 +103,14 @@ export class MailgunService {
 
     const emailHtml = mailGenerator.generate(emailContent);
 
-    const formData = new FormData();
-    formData.append(
-      'from',
-      'Ahmed from Smooth Transact <contact@ahmedolawale.me>',
-    );
-    formData.append('to', to);
-    formData.append('subject', 'Password Reset Request from Smooth Transact');
-    formData.append('html', emailHtml);
+    const mailOptions = {
+      from: 'Ahmed from Smooth Transact <contact@ahmedolawale.me>',
+      to: to,
+      subject: 'Password Reset Request from Smooth Transact',
+      html: emailHtml,
+    };
 
-    const response = await axios.post(
-      `https://api.mailgun.net/v3/${this.domain}/messages`,
-      formData,
-      {
-        auth: {
-          username: 'api',
-          password: this.apiKey,
-        },
-        headers: formData.getHeaders(),
-      },
-    );
-
-    return response.data;
+    const info = await transporter.sendMail(mailOptions);
+    return info.response;
   }
 }
