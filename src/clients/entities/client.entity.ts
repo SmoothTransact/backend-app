@@ -18,10 +18,10 @@ export class ClientProfile {
   @Column()
   fullName: string;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true })
   phone: string;
 
   @ManyToOne(() => User, (user) => user.clientProfiles, {
