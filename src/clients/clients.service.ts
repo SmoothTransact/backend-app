@@ -61,4 +61,31 @@ export class ClientsService {
 
     return client;
   }
+
+  async editClientProfile(
+    clientId: string,
+    updateClientProfileDto: CreateClientProfileDto,
+  ): Promise<ClientProfile> {
+    const existingClient = await this.clientRepository.findOne({
+      where: { id: clientId },
+    });
+
+    if (!existingClient) {
+      throw new NotFoundException('Client not found');
+    }
+
+    existingClient.fullName = updateClientProfileDto.fullName;
+    existingClient.email = updateClientProfileDto.email;
+    existingClient.phone = updateClientProfileDto.phone;
+
+    return this.clientRepository.save(existingClient);
+  }
+
+  async deleteClientProfile(clientId: string): Promise<void> {
+    const result = await this.clientRepository.delete(clientId);
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Client not found');
+    }
+  }
 }
