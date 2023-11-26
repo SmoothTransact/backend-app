@@ -7,7 +7,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Roles, ROLES } from '../types/user.types';
-import { ClientProfile } from 'src/clients/entities/client.entity';
+import { ClientProfile } from '../../clients/entities/client.entity';
+import { Alert } from '../../alerts/entities/alert.entity';
 
 @Entity()
 export class User {
@@ -33,6 +34,9 @@ export class User {
     cascade: true,
   })
   clientProfiles: ClientProfile[];
+
+  @OneToMany(() => Alert, (alert) => alert.user)
+  alerts: Alert[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
