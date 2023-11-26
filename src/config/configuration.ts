@@ -1,4 +1,5 @@
 export default () => ({
+  node_env: process.env.NODE_ENV,
   otp_secret: process.env.OTP_TOKEN_SECRET,
   refresh_secret: process.env.REFRESH_TOKEN_SECRET,
   refresh_expiresIn: process.env.REFRESH_TOKEN_EXPIRESIN,

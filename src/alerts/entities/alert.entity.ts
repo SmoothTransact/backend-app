@@ -36,9 +36,6 @@ export class Alert {
   })
   notifications: Notification[];
 
-  @Column()
-  userId: string;
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

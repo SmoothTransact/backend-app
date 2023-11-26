@@ -22,12 +22,7 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    const user = await this.usersRepository
-      .createQueryBuilder('user')
-      .where('user.email = :email', { email })
-      .getOne();
-
-    return user;
+    return await this.usersRepository.findOne({ where: { email: email } });
   }
 
   async findOne(id: string): Promise<User> {
