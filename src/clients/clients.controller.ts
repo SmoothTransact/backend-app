@@ -37,7 +37,6 @@ export class ClientsController {
   async getAllClientProfiles(
     @Req() req: Request,
   ): Promise<CreateClientProfileDto[]> {
-    console.log('Request Object:', req);
     const userId = (req.user as any).user.id;
     const clientProfiles =
       await this.clientsService.getAllClientProfiles(userId);

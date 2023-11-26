@@ -23,7 +23,7 @@ export class ClientsService {
     client: CreateClientProfileDto,
   ): Promise<ClientProfile> {
     const existingClientProfile = await this.clientRepository.findOne({
-      where: [{ email: client.email }, { phone: client.phone }],
+      where: { user: { id: userId }, email: client.email },
     });
 
     if (existingClientProfile) {
