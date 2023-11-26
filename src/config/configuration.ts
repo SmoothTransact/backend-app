@@ -9,6 +9,8 @@ export default () => ({
   google_client_secret: process.env.GOOGLE_SECRET,
   mailgun_api_key: process.env.MAILGUN_API_KEY,
   mailgun_domain: process.env.MAILGUN_DOMAIN,
+  mailgun_user: process.env.MAILGUN_USER,
+  mailgun_password: process.env.MAILGUN_PASSWORD,
   redis_host: process.env.REDIS_HOST,
   redis_port: process.env.REDIS_PORT,
   redis_url: process.env.REDIS_URL,
