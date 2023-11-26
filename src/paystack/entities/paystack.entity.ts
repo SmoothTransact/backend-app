@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Transaction } from '../../transactions/entities/transactions.entity';
 
 @Entity()
@@ -12,7 +20,7 @@ export class PayStack {
   @Column()
   transactionId: string;
 
-  @OneToOne(() => Transaction)
+  @OneToOne(() => Transaction, { cascade: true })
   @JoinColumn({ name: 'transactionId' })
   transaction: Transaction;
 

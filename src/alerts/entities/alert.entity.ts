@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Invoice } from '../../invoices/entities/invoice.entity';
-import { Notification } from '../../notification-service/entities/notification.entity';
+import { Notifications } from '../../notification-service/entities/notification.entity';
 
 @Entity()
 export class Alert {
@@ -27,16 +27,17 @@ export class Alert {
 
   @ManyToOne(() => Invoice, (invoice) => invoice.alerts)
   invoice: Invoice;
-  
+
   @ManyToOne(() => User, (user) => user.alerts)
   user: User;
 
-  @OneToMany(() => Notification, (notification) => notification.alert)
+  @OneToMany(() => Notifications, (notification) => notification.alerts, {
+    cascade: true,
+  })
   notifications: Notification[];
-  
+
   @Column()
   userId: string;
-
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

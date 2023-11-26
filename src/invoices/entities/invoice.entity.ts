@@ -23,10 +23,12 @@ export class Invoice {
   @Column({ default: 'unpaid' }) // 'unpaid', 'partially_paid', 'paid'
   status: string;
 
-  @OneToMany(() => Transaction, (transaction) => transaction.invoice)
+  @OneToMany(() => Transaction, (transaction) => transaction.invoice, {
+    cascade: true,
+  })
   transactions: Transaction[];
 
-  @OneToMany(() => Alert, (alert) => alert.invoice)
+  @OneToMany(() => Alert, (alert) => alert.invoice, { cascade: true })
   alerts: Alert[];
 
   @CreateDateColumn({ type: 'timestamp' })

@@ -35,7 +35,7 @@ export class User {
   })
   clientProfiles: ClientProfile[];
 
-  @OneToMany(() => Alert, (alert) => alert.user)
+  @OneToMany(() => Alert, (alert) => alert.user, { cascade: true })
   alerts: Alert[];
 
   @CreateDateColumn({ type: 'timestamp' })

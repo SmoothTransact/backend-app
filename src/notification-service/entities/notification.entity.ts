@@ -9,7 +9,7 @@ import {
 import { Alert } from '../../alerts/entities/alert.entity';
 
 @Entity()
-export class Notification {
+export class Notifications {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -17,7 +17,7 @@ export class Notification {
   alertId: string;
 
   @ManyToOne(() => Alert, (alert) => alert.notifications)
-  alert: Alert;
+  alerts: Alert;
 
   @Column({ default: 'unread' }) // 'unread', 'read'
   status: string;
