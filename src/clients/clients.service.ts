@@ -30,7 +30,9 @@ export class ClientsService {
       throw new ConflictException('Client profile already exists');
     }
 
-    const user = await this.usersRepository.findOneBy({ id: userId });
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
 
     const clientProfile = new ClientProfile();
     clientProfile.fullName = client.fullName;

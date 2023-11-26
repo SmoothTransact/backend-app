@@ -25,7 +25,7 @@ export class ClientsController {
     @Req() req: Request,
     @Body() createClientProfileDto: CreateClientProfileDto,
   ) {
-    const userId = (req.user as any).userId;
+    const userId = (req.user as any).user.id;
 
     return this.clientsService.createClientProfile(
       userId,
@@ -37,7 +37,8 @@ export class ClientsController {
   async getAllClientProfiles(
     @Req() req: Request,
   ): Promise<CreateClientProfileDto[]> {
-    const userId = (req.user as any).userId;
+    console.log('Request Object:', req);
+    const userId = (req.user as any).user.id;
     const clientProfiles =
       await this.clientsService.getAllClientProfiles(userId);
 
