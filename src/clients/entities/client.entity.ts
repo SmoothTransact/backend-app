@@ -7,8 +7,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Transaction } from 'src/transactions/entities/transactions.entity';
 
 @Entity()
 export class ClientProfile {
@@ -23,6 +25,9 @@ export class ClientProfile {
 
   @Column({ nullable: true })
   phone: string;
+
+  @OneToMany(() => Transaction, (transactions) => transactions.client)
+  transactions: Transaction[];
 
   @ManyToOne(() => User, (user) => user.clientProfiles, {
     onDelete: 'CASCADE',

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import {
@@ -20,14 +20,17 @@ export class UsersService {
   async create(
     createUserDto: CreatePersonalUserDto | CreateBusinessUserDto,
   ): Promise<User> {
-    const newWallet = await this.walletService.createWallet();
+    const newUser = this.usersRepository.create(createUserDto);
 
-    const newUser = this.usersRepository.create({
-      ...createUserDto,
-      wallet: newWallet,
-    });
+    const savedUser = await this.usersRepository.save(newUser);
 
-    return this.usersRepository.save(newUser);
+    const newWallet = await this.walletService.createWallet(savedUser.id);
+
+    savedUser.wallet = newWallet;
+
+    await this.usersRepository.save(savedUser);
+
+    return savedUser;
   }
 
   async findAll(): Promise<User[]> {
@@ -39,9 +42,15 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
-    return await this.usersRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: { id: id },
+      relations: ['wallet'],
     });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async stats(): Promise<{ NumberOfUsers: number }> {
