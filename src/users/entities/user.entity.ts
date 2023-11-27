@@ -13,6 +13,8 @@ import { Types } from '../types/user.types';
 import { ClientProfile } from '../../clients/entities/client.entity';
 import { Alert } from '../../alerts/entities/alert.entity';
 import { Wallet } from '../../wallet/entities/wallet.entity';
+import { Invoice } from 'src/invoices/entities/invoice.entity';
+import { Transaction } from 'src/transactions/entities/transactions.entity';
 
 @Entity({ name: 'user' })
 export class User {
@@ -31,15 +33,21 @@ export class User {
   @Column()
   types: Types;
 
-  @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
-  @JoinColumn()
-  wallet: Wallet;
-
   @Column({ default: 'user' })
   role: Roles;
 
   @Column({ nullable: true })
   refreshToken?: string;
+
+  @OneToOne(() => Wallet, { cascade: true })
+  @JoinColumn()
+  wallet: Wallet;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  transactions: Transaction[];
+
+  @OneToMany(() => Invoice, (invoices) => invoices.user)
+  invoices: Invoice;
 
   @OneToMany(() => ClientProfile, (clientProfile) => clientProfile.user, {
     cascade: true,

@@ -19,6 +19,7 @@ import {
   CreateBusinessUserDto,
   CreatePersonalUserDto,
 } from 'src/users/dto/create-user.dto';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     private mailgunService: MailgunService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private walletService: WalletService,
   ) {
     this.totp = totp;
     this.totp.options = { digits: 6, step: 300 };
@@ -47,7 +49,15 @@ export class AuthService {
       types: TYPES.PERSONAL,
     });
 
-    newUser.password = undefined;
+    await this.mailgunService.sendWelcomeEmail(
+      newUser.email,
+      newUser.fullName || '',
+    );
+    // // Create and associate a wallet for the user
+    // const wallet = await this.walletService.createWallet(newUser.id);
+
+    // newUser.password = undefined;
+    // newUser.wallet = wallet; // Assign the wallet to the user
 
     return newUser;
   }
@@ -66,12 +76,10 @@ export class AuthService {
       types: TYPES.BUSINESS,
     });
 
-    newUser.password = undefined;
-
-    // await this.mailgunService.sendWelcomeEmail(
-    //   newUser.email,
-    //   newUser.fullName || '',
-    // );
+    await this.mailgunService.sendWelcomeEmail(
+      newUser.email,
+      newUser.fullName || '',
+    );
 
     return newUser;
   }

@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { Transaction } from '../../transactions/entities/transactions.entity';
 import { Alert } from '../../alerts/entities/alert.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Invoice {
@@ -20,8 +22,14 @@ export class Invoice {
   @Column('decimal', { precision: 10, scale: 2 })
   amount: number;
 
-  @Column({ default: 'unpaid' }) // 'unpaid', 'partially_paid', 'paid'
+  @Column({ default: 'unpaid' })
   status: string;
+
+  @Column({ nullable: true })
+  paymentReference: string;
+
+  @ManyToOne(() => User, (user) => user.invoices)
+  user: User;
 
   @OneToMany(() => Transaction, (transaction) => transaction.invoice, {
     cascade: true,

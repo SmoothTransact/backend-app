@@ -4,9 +4,13 @@ import {
   Post,
   HttpException,
   HttpStatus,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -33,5 +37,11 @@ export class UsersController {
   @Get('/stats')
   stats(): Promise<{ NumberOfUsers: number }> {
     return this.usersService.stats();
+  }
+
+  @Get('/profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@Req() req: Request): Promise<User> {
+    return req.user as User;
   }
 }
