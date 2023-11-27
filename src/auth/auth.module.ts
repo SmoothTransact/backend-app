@@ -12,12 +12,14 @@ import { UsersService } from '../users/users.service';
 import { MailgunService } from '../mailgun/mailgun.service';
 import { User } from '../users/entities/user.entity';
 import { ClientsModule } from 'src/clients/clients.module';
+import { Wallet } from 'src/wallet/entities/wallet.entity';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Module({
   imports: [
     UsersModule,
     ClientsModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Wallet]),
     ConfigModule.forRoot(),
     JwtModule.register({}),
   ],
@@ -27,6 +29,7 @@ import { ClientsModule } from 'src/clients/clients.module';
     JwtStrategy,
     UsersService,
     MailgunService,
+    WalletService,
   ],
   controllers: [AuthController],
   exports: [AuthService],

@@ -11,6 +11,7 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { PaystackModule } from './paystack/paystack.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { NotificationServiceModule } from './notification-service/notification-service.module';
+import { WalletModule } from './wallet/wallet.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -31,6 +32,7 @@ import configuration from './config/configuration';
     PaystackModule,
     AlertsModule,
     NotificationServiceModule,
+    WalletModule,
   ],
 })
 export class AppModule {}
