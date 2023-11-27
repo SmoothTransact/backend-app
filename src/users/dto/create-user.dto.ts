@@ -1,25 +1,38 @@
-import {
-  IsNotEmpty,
-  IsEmail,
-  IsString,
-  MinLength,
-  IsOptional,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { Types } from '../types/user.types';
 
-export class CreateUserDto {
-  @IsNotEmpty()
+export class CreatePersonalUserDto {
   @IsString()
-  fullName: string;
-
   @IsNotEmpty()
+  firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
+
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
-  @IsNotEmpty()
   @IsString()
-  @MinLength(8)
+  @IsNotEmpty()
   password: string;
 
-  @IsOptional()
-  refreshToken?: string;
+  types: Types;
+}
+
+export class CreateBusinessUserDto {
+  @IsString()
+  @IsNotEmpty()
+  businessName: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  types: Types;
 }

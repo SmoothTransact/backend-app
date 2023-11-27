@@ -9,11 +9,16 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateUserDto } from '../users/dto/create-user-business.dto';
 import { UsersService } from '../users/users.service';
 import { MailgunService } from '../mailgun/mailgun.service';
 import { Payload } from './auth.type';
 import { User } from '../users/entities/user.entity';
+import { TYPES } from 'src/users/types/user.types';
+import {
+  CreateBusinessUserDto,
+  CreatePersonalUserDto,
+} from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,21 +33,50 @@ export class AuthService {
     this.totp.options = { digits: 6, step: 300 };
   }
 
-  async signup(user: CreateUserDto) {
-    const userExists = await this.usersService.findByEmail(user.email);
+  async signupForPersonal(user: CreateUserDto) {
+    const personalUser = user as CreatePersonalUserDto;
+    const userExists = await this.usersService.findByEmail(personalUser.email);
 
     if (userExists) {
       throw new ConflictException('User already exists');
     }
 
-    user.password = await this.hashPassword(user.password);
-    const newUser = await this.usersService.create(user);
+    personalUser.password = await this.hashPassword(personalUser.password);
+    const newUser = await this.usersService.create({
+      ...personalUser,
+      types: TYPES.PERSONAL,
+    });
+
     newUser.password = undefined;
 
-    await this.mailgunService.sendWelcomeEmail(
-      newUser.email,
-      newUser.fullName || '',
-    );
+    // await this.mailgunService.sendWelcomeEmail(
+    //   newUser.email,
+    //   newUser.fullName || '',
+    // );
+
+    return newUser;
+  }
+
+  async signupForBusiness(user: CreateUserDto) {
+    const businessUser = user as CreateBusinessUserDto;
+    const userExists = await this.usersService.findByEmail(businessUser.email);
+
+    if (userExists) {
+      throw new ConflictException('Business already exists');
+    }
+
+    businessUser.password = await this.hashPassword(businessUser.password);
+    const newUser = await this.usersService.create({
+      ...businessUser,
+      types: TYPES.BUSINESS,
+    });
+
+    newUser.password = undefined;
+
+    // await this.mailgunService.sendWelcomeEmail(
+    //   newUser.email,
+    //   newUser.fullName || '',
+    // );
 
     return newUser;
   }
