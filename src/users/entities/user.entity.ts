@@ -6,7 +6,8 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Roles, ROLES } from '../types/user.types';
+import { Roles } from '../types/user.types';
+import { Types } from '../types/user.types';
 import { ClientProfile } from '../../clients/entities/client.entity';
 import { Alert } from '../../alerts/entities/alert.entity';
 
@@ -24,7 +25,10 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: ROLES.USER })
+  @Column()
+  types: Types;
+
+  @Column({ default: 'user' })
   role: Roles;
 
   @Column({ nullable: true })

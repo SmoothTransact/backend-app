@@ -11,7 +11,10 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import {
+  CreateBusinessUserDto,
+  CreatePersonalUserDto,
+} from '../users/dto/create-user.dto';
 import {
   RefreshTokenDto,
   SigninDto,
@@ -32,9 +35,19 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/signup')
-  async signup(@Body() user: CreateUserDto): Promise<SignupResponse> {
-    const data = await this.authService.signup(user);
+  @Post('/signup/personal')
+  async signupForPersonal(
+    @Body() user: CreatePersonalUserDto,
+  ): Promise<SignupResponse> {
+    const data = await this.authService.signupForPersonal(user);
+    return { message: 'Signup successfully', data };
+  }
+
+  @Post('/signup/business')
+  async signupForBusiness(
+    @Body() user: CreateBusinessUserDto,
+  ): Promise<SignupResponse> {
+    const data = await this.authService.signupForBusiness(user);
     return { message: 'Signup successfully', data };
   }
 
