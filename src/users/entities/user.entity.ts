@@ -11,7 +11,7 @@ import { Types } from '../types/user.types';
 import { ClientProfile } from '../../clients/entities/client.entity';
 import { Alert } from '../../alerts/entities/alert.entity';
 
-@Entity()
+@Entity({ name: 'user' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;

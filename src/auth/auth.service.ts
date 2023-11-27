@@ -49,11 +49,6 @@ export class AuthService {
 
     newUser.password = undefined;
 
-    // await this.mailgunService.sendWelcomeEmail(
-    //   newUser.email,
-    //   newUser.fullName || '',
-    // );
-
     return newUser;
   }
 
