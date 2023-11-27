@@ -7,19 +7,27 @@ import {
 } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private walletService: WalletService,
   ) {}
 
   async create(
     createUserDto: CreatePersonalUserDto | CreateBusinessUserDto,
   ): Promise<User> {
-    const newUser = this.usersRepository.create(createUserDto);
-    return await this.usersRepository.save(newUser);
+    const newWallet = await this.walletService.createWallet();
+
+    const newUser = this.usersRepository.create({
+      ...createUserDto,
+      wallet: newWallet,
+    });
+
+    return this.usersRepository.save(newUser);
   }
 
   async findAll(): Promise<User[]> {

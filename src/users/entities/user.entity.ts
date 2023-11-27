@@ -5,11 +5,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Roles } from '../types/user.types';
 import { Types } from '../types/user.types';
 import { ClientProfile } from '../../clients/entities/client.entity';
 import { Alert } from '../../alerts/entities/alert.entity';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 
 @Entity({ name: 'user' })
 export class User {
@@ -27,6 +30,10 @@ export class User {
 
   @Column()
   types: Types;
+
+  @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
+  @JoinColumn()
+  wallet: Wallet;
 
   @Column({ default: 'user' })
   role: Roles;
