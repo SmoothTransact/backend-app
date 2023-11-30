@@ -49,15 +49,10 @@ export class AuthService {
       types: TYPES.PERSONAL,
     });
 
-    await this.mailgunService.sendWelcomeEmail(
-      newUser.email,
-      newUser.fullName || '',
-    );
-    // // Create and associate a wallet for the user
-    // const wallet = await this.walletService.createWallet(newUser.id);
-
-    // newUser.password = undefined;
-    // newUser.wallet = wallet; // Assign the wallet to the user
+    // await this.mailgunService.sendWelcomeEmail(
+    //   newUser.email,
+    //   newUser.fullName || '',
+    // );
 
     return newUser;
   }
@@ -76,10 +71,10 @@ export class AuthService {
       types: TYPES.BUSINESS,
     });
 
-    await this.mailgunService.sendWelcomeEmail(
-      newUser.email,
-      newUser.fullName || '',
-    );
+    // await this.mailgunService.sendWelcomeEmail(
+    //   newUser.email,
+    //   newUser.fullName || '',
+    // );
 
     return newUser;
   }
