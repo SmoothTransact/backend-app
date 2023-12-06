@@ -15,6 +15,11 @@ export default () => ({
   redis_port: process.env.REDIS_PORT,
   redis_url: process.env.REDIS_URL,
   secretKey: process.env.PAYSTACK_SECRET,
+  mail_client_id: process.env.MAIL_CLIENT_ID,
+  mail_client_secret: process.env.MAIL_CLIENT_SECRET,
+  mail_refresh_token: process.env.MAIL_REFRESH_TOKEN,
+  mail_access_token: process.env.MAIL_ACCESS_TOKEN,
+  user_mail: process.env.USER_MAIL,
   http: {
     host: process.env.HTTP_HOST || 'localhost',
     port: parseInt(process.env.HTTP_PORT, 10) || 3000,

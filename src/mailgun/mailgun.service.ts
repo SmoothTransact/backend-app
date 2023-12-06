@@ -1,30 +1,45 @@
-// mailgun.service.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import * as Mailgen from 'mailgen';
+import { google } from 'googleapis';
 
 @Injectable()
 export class MailgunService {
-  private readonly user: string;
-  private readonly pass: string;
+  private readonly clientId: string;
+  private readonly clientSecret: string;
+  private readonly refreshToken: string;
+  private readonly userMail: string;
+  private readonly oauth2Client: any;
 
   constructor(private configService: ConfigService) {
-    // this.apiKey = configService.get<string>('mailgun_api_key');
-    this.user = configService.get<string>('mailgun_user');
-    this.pass = configService.get<string>('mailgun_password');
+    this.clientId = configService.get<string>('mail_client_id');
+    this.clientSecret = configService.get<string>('mail_client_secret');
+    this.refreshToken = configService.get<string>('mail_refresh_token');
+    this.userMail = configService.get<string>('user_mail');
+
+    this.oauth2Client = new google.auth.OAuth2(
+      this.clientId,
+      this.clientSecret,
+      this.refreshToken,
+    );
+    this.oauth2Client.setCredentials({ refresh_token: this.refreshToken });
   }
 
   async sendWelcomeEmail(to: string, username: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const accessToken = await this.oauth2Client.getAccessToken();
+
     const transporter = nodemailer.createTransport({
-      host: 'smtp.mailgun.org',
-      port: 587,
+      host: 'smtp.gmail.com',
       auth: {
-        user: this.user,
-        pass: this.pass,
+        type: 'OAuth2',
+        user: this.userMail,
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        refreshToken: this.refreshToken,
       },
     });
-
     const mailGenerator = new Mailgen({
       theme: 'default',
       product: {
@@ -65,12 +80,17 @@ export class MailgunService {
   }
 
   async sendPasswordResetEmail(to: string, username: string, otp: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const accessToken = await this.oauth2Client.getAccessToken();
+
     const transporter = nodemailer.createTransport({
-      host: 'smtp.mailgun.org',
-      port: 587,
+      host: 'smtp.gmail.com',
       auth: {
-        user: this.user,
-        pass: this.pass,
+        type: 'OAuth2',
+        user: this.userMail,
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        refreshToken: this.refreshToken,
       },
     });
 

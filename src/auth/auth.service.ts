@@ -49,10 +49,10 @@ export class AuthService {
       types: TYPES.PERSONAL,
     });
 
-    // await this.mailgunService.sendWelcomeEmail(
-    //   newUser.email,
-    //   newUser.fullName || '',
-    // );
+    await this.mailgunService.sendWelcomeEmail(
+      newUser.email,
+      newUser.fullName || '',
+    );
 
     return newUser;
   }
@@ -71,10 +71,10 @@ export class AuthService {
       types: TYPES.BUSINESS,
     });
 
-    // await this.mailgunService.sendWelcomeEmail(
-    //   newUser.email,
-    //   newUser.fullName || '',
-    // );
+    await this.mailgunService.sendWelcomeEmail(
+      newUser.email,
+      newUser.fullName || '',
+    );
 
     return newUser;
   }
