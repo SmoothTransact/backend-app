@@ -8,7 +8,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 class Balance {
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'decimal', default: 0 })
   amount: number;
 }
 

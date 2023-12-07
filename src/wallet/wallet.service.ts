@@ -22,24 +22,33 @@ export class WalletService {
     return this.walletRepository.save(wallet);
   }
 
-  async updateWalletBalance(walletId: string, amount: number): Promise<void> {
+  async updateWalletBalance(userId: string, amount: number): Promise<void> {
     try {
-      console.log('Updating wallet balance for walletId:', walletId);
-
       const wallet = await this.walletRepository.findOne({
-        where: { id: walletId },
+        where: { user: { id: userId } },
       });
 
-      console.log('Found wallet:', wallet);
+      if (!wallet) {
+        await this.createWallet(userId);
 
-      if (!wallet.id) {
-        throw new NotFoundException('User wallet not found');
+        const newWallet = await this.walletRepository.findOne({
+          where: { user: { id: userId } },
+        });
+
+        if (!newWallet) {
+          throw new NotFoundException('User wallet not found');
+        }
+
+        newWallet.balance.amount += amount;
+
+        await this.walletRepository.save(newWallet);
+        console.log('Wallet balance updated successfully');
+      } else {
+        wallet.balance.amount += amount;
+
+        await this.walletRepository.save(wallet);
+        console.log('Wallet balance updated successfully');
       }
-
-      wallet.balance.amount += amount;
-
-      await this.walletRepository.save(wallet);
-      console.log('Wallet balance updated successfully');
     } catch (error) {
       console.error(error);
       throw new Error('Failed to update wallet balance');

@@ -3,15 +3,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoicesService } from './invoices.service';
 import { InvoiceController } from './invoices.controller';
 import { Invoice } from './entities/invoice.entity';
+import { User } from '../users/entities/user.entity';
+import { ClientProfile } from '../clients/entities/client.entity';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { PaystackService } from 'src/paystack/paystack.service';
+import { ClientsService } from 'src/clients/clients.service';
+import { WalletService } from 'src/wallet/wallet.service';
+import { Wallet } from 'src/wallet/entities/wallet.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoice]),
+    TypeOrmModule.forFeature([Invoice, User, ClientProfile, Wallet]),
     forwardRef(() => TransactionsModule),
   ],
-  providers: [InvoicesService, PaystackService],
+  providers: [InvoicesService, PaystackService, ClientsService, WalletService],
   controllers: [InvoiceController],
   exports: [InvoicesService],
 })

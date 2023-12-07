@@ -1,15 +1,21 @@
+// invoices/invoices.service.ts
 import {
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Invoice } from './entities/invoice.entity';
 import { CreateInvoiceDto } from './dtos/invoice.dto';
 import { TransactionsService } from '../transactions/transactions.service';
 import { PaystackService } from '../paystack/paystack.service';
+import { ClientsService } from 'src/clients/clients.service';
+import { Transaction } from 'src/transactions/entities/transactions.entity';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Injectable()
 export class InvoicesService {
@@ -20,36 +26,48 @@ export class InvoicesService {
     private readonly paystackService: PaystackService,
     @Inject(forwardRef(() => TransactionsService))
     private readonly transactionsService: TransactionsService,
+    private readonly clientsService: ClientsService,
+    private readonly walletService: WalletService,
   ) {}
 
   async createInvoice(
     createInvoiceDto: CreateInvoiceDto,
     userId: string,
-  ): Promise<{ invoice: Invoice; paymentLink: string }> {
-    const { description, amount } = createInvoiceDto;
+    clientId: string,
+  ): Promise<{ invoice: Invoice; transaction: Transaction }> {
+    try {
+      await this.clientsService.getClientByIdAndUserId(clientId, userId);
 
-    const newInvoice = this.invoiceRepository.create({
-      description,
-      amount,
-      status: 'unpaid',
-      user: { id: userId },
-    });
+      const { description, amount } = createInvoiceDto;
 
-    const savedInvoice = await this.invoiceRepository.save(newInvoice);
+      const newInvoice = this.invoiceRepository.create({
+        description,
+        amount,
+        status: 'unpaid',
+        user: { id: userId },
+        client: { id: clientId },
+      } as DeepPartial<Invoice>);
 
-    // Create a transaction
-    await this.transactionsService.createTransaction({
-      invoiceId: savedInvoice.id,
-      amount: savedInvoice.amount,
-    });
+      const savedInvoice = await this.invoiceRepository.save(newInvoice);
 
-    // Initiate payment and get the payment link
-    const paymentLink = await this.paystackService.initiatePayment(
-      savedInvoice.user.email,
-      savedInvoice.amount,
-    );
+      const transaction = await this.transactionsService.createTransaction(
+        {
+          invoiceId: savedInvoice.id,
+          amount: savedInvoice.amount,
+          status: 'pending',
+        },
+        userId,
+        clientId,
+      );
 
-    return { invoice: savedInvoice, paymentLink };
+      return { invoice: savedInvoice, transaction };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to create invoice',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getInvoiceDetails(invoiceId: string): Promise<Invoice> {
@@ -65,19 +83,62 @@ export class InvoicesService {
     return invoice;
   }
 
-  async markInvoiceAsPaid(invoiceId: string): Promise<Invoice> {
+  async markInvoiceAsPaid(invoiceId: string): Promise<{ invoice: Invoice }> {
     const invoice = await this.getInvoiceDetails(invoiceId);
 
-    // Verify payment (You might want to implement this logic in PaystackService)
     const paymentDetails = await this.paystackService.verifyPayment(
       invoice.paymentReference,
     );
 
-    if (paymentDetails.status === 'success') {
+    if (paymentDetails.data.status === 'success') {
+      const { reference, amount } = paymentDetails.data;
+
       invoice.status = 'paid';
-      return await this.invoiceRepository.save(invoice);
+      invoice.paymentReference = reference;
+      invoice.amount = amount;
+
+      const updatedInvoice = await this.invoiceRepository.save(invoice);
+
+      await this.transactionsService.updateTransactionStatus(
+        invoiceId,
+        'success',
+      );
+
+      await this.walletService.updateWalletBalance(invoice.user.id, amount);
+
+      return { invoice: updatedInvoice };
     } else {
-      throw new Error('Payment verification failed');
+      throw new HttpException(
+        'Payment verification failed',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async generatePaystackLink(invoiceId: string): Promise<string> {
+    const invoice = await this.getInvoiceDetails(invoiceId);
+
+    if (invoice.paymentReference) {
+      return this.paystackService.getPaymentLinkFromReference(
+        invoice.paymentReference,
+      );
+    }
+
+    try {
+      const paymentResponse = await this.paystackService.initiatePayment(
+        invoice.user.email,
+        invoice.amount,
+      );
+
+      invoice.paymentReference = paymentResponse.data.reference;
+      await this.invoiceRepository.save(invoice);
+
+      return paymentResponse.data.authorization_url;
+    } catch (error) {
+      throw new HttpException(
+        'Error generating Paystack link',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

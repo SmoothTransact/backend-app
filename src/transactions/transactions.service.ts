@@ -1,7 +1,7 @@
 // transactions.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { CreateTransactionDto } from './dtos/transactions.dto';
 import { Transaction } from './entities/transactions.entity';
 import { WalletService } from '../wallet/wallet.service';
@@ -21,9 +21,11 @@ export class TransactionsService {
 
   async createTransaction(
     createTransactionDto: CreateTransactionDto,
+    userId: string,
+    clientId: string,
   ): Promise<Transaction> {
     try {
-      const { invoiceId, amount } = createTransactionDto;
+      const { invoiceId, amount, status } = createTransactionDto;
 
       const invoiceDetails =
         await this.invoicesService.getInvoiceDetails(invoiceId);
@@ -39,19 +41,39 @@ export class TransactionsService {
       const newTransaction = this.transactionRepository.create({
         invoice: invoiceDetails,
         amount,
-        status: 'pending',
-      });
+        status,
+        user: { id: userId },
+        client: { id: clientId },
+      } as DeepPartial<Transaction>);
 
-      newTransaction.user = user;
+      await this.transactionRepository.save(newTransaction);
 
-      const savedTransaction =
-        await this.transactionRepository.save(newTransaction);
-      await this.walletService.updateWalletBalance(user.id, amount);
-
-      return savedTransaction;
+      return newTransaction;
     } catch (error) {
       console.error(error);
       throw new Error('Failed to create transaction');
+    }
+  }
+
+  async updateTransactionStatus(
+    invoiceId: string,
+    status: string,
+  ): Promise<Transaction> {
+    try {
+      const transaction = await this.transactionRepository.findOne({
+        where: { invoiceId },
+      });
+
+      if (!transaction) {
+        throw new NotFoundException('Transaction not found');
+      }
+
+      transaction.status = status;
+
+      return await this.transactionRepository.save(transaction);
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to update transaction status');
     }
   }
 }
