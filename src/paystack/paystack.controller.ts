@@ -1,26 +1,34 @@
-import { Controller, Get, Param } from '@nestjs/common';
+// paystack/paystack.controller.ts
+import { Controller, Post, Body } from '@nestjs/common';
 import { PaystackService } from './paystack.service';
 
 @Controller('paystack')
 export class PaystackController {
   constructor(private readonly paystackService: PaystackService) {}
 
-  @Get('initiate-payment')
-  async initiatePayment(email: string, amount: number): Promise<any> {
-    const result = await this.paystackService.initiatePayment(email, amount);
-    return result;
+  @Post('initiate-payment')
+  async initiatePayment(
+    @Body() body: { email: string; amount: number },
+  ): Promise<any> {
+    try {
+      const paymentLink = await this.paystackService.initiatePayment(
+        body.email,
+        body.amount,
+      );
+      return { paymentLink };
+    } catch (error) {
+      console.error(error);
+      return { error: 'Failed to initiate payment' };
+    }
   }
 
-  @Get('verify/:reference')
-  async verifyPayment(@Param('reference') reference: string): Promise<any> {
+  @Post('verify-payment')
+  async verifyPayment(@Body() body: { reference: string }): Promise<any> {
     try {
-      const verificationResult =
-        await this.paystackService.processPaymentVerification(reference);
-
-      return {
-        message: 'Payment verification successful',
-        data: verificationResult,
-      };
+      const paymentDetails = await this.paystackService.verifyPayment(
+        body.reference,
+      );
+      return { paymentDetails };
     } catch (error) {
       console.error(error);
       return { error: 'Failed to verify payment' };

@@ -1,5 +1,5 @@
 // transaction.dto.ts
-import { IsUUID, IsNumber } from 'class-validator';
+import { IsUUID, IsNumber, IsString } from 'class-validator';
 // import { Transaction } from '../entities/transactions.entity';
 
 export class CreateTransactionDto {
@@ -8,4 +8,7 @@ export class CreateTransactionDto {
 
   @IsNumber()
   amount: number;
+
+  @IsString()
+  status: string;
 }

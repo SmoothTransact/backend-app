@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -57,6 +58,21 @@ export class ClientsService {
 
     if (!client) {
       throw new NotFoundException('Client not found');
+    }
+
+    return client;
+  }
+
+  async getClientByIdAndUserId(
+    clientId: string,
+    userId: string,
+  ): Promise<ClientProfile> {
+    const client = await this.clientRepository.findOne({
+      where: { id: clientId, user: { id: userId } },
+    });
+
+    if (!client) {
+      throw new ForbiddenException('Unauthorized access to client');
     }
 
     return client;

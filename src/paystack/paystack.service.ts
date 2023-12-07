@@ -25,7 +25,7 @@ export class PaystackService {
         paystackRes.on('end', () => {
           try {
             const responseJson = JSON.parse(responseData);
-            resolve(responseJson.data);
+            resolve(responseJson);
           } catch (error) {
             reject(
               new HttpException(
@@ -61,7 +61,7 @@ export class PaystackService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: this.secretKey,
+        Authorization: `Bearer ${this.secretKey}`,
       },
     };
 
@@ -75,11 +75,34 @@ export class PaystackService {
       path: `/transaction/verify/${encodeURIComponent(reference)}`,
       method: 'GET',
       headers: {
-        Authorization: this.secretKey,
+        Authorization: `Bearer ${this.secretKey}`,
       },
     };
-
     return this.makeRequest(options);
+  }
+
+  async getPaymentLinkFromReference(reference: string): Promise<string> {
+    try {
+      const paymentDetails = await this.verifyPayment(reference);
+
+      // Handle various Paystack response structures
+      const authorization =
+        paymentDetails.data?.authorization || paymentDetails.authorization;
+
+      if (!authorization) {
+        throw new HttpException(
+          'Invalid Paystack response structure',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      return authorization.authorization_url;
+    } catch (error) {
+      throw new HttpException(
+        'Error retrieving payment link from Paystack reference',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async processPaymentVerification(reference: string): Promise<any> {

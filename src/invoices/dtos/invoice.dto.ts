@@ -8,6 +8,10 @@ export class CreateInvoiceDto {
   @IsNumber()
   amount: number;
 
+  @IsString()
+  @IsNotEmpty()
+  clientId: string;
+
   @IsNotEmpty()
   @IsEnum(['paid', 'pending', 'due'])
   status: string;
