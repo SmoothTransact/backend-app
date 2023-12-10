@@ -1,4 +1,11 @@
-import { IsNumber, IsNotEmpty, IsString, IsEnum } from 'class-validator';
+import {
+  IsNumber,
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+  IsDateString,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateInvoiceDto {
   @IsNotEmpty()
@@ -15,4 +22,17 @@ export class CreateInvoiceDto {
   @IsNotEmpty()
   @IsEnum(['paid', 'pending', 'due'])
   status: string;
+
+  @IsDateString()
+  @IsOptional()
+  dueDate: string;
+
+  @IsString()
+  clientFullName: string;
+
+  @IsString()
+  clientEmail: string;
+
+  @IsString()
+  clientPhone: string;
 }

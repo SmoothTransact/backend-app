@@ -1,5 +1,6 @@
 import { User } from 'src/users/entities/user.entity';
 import { Roles } from 'src/users/types/user.types';
+import { Wallet } from 'src/wallet/entities/wallet.entity';
 
 export type Response<T> = {
   message: string;
@@ -9,6 +10,7 @@ export type Response<T> = {
 type Signin = {
   accessToken: string;
   refreshToken: string;
+  wallet: Wallet;
 };
 
 type Signup = Pick<
@@ -16,7 +18,7 @@ type Signup = Pick<
   'id' | 'fullName' | 'email' | 'createdAt' | 'updatedAt'
 >;
 
-type AccessToken = Omit<Signin, 'refreshToken'>;
+type AccessToken = Omit<Signin, 'refreshToken' | 'wallet'>;
 
 type ForgotPassword = {
   otp: string;

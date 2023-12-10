@@ -63,7 +63,8 @@ export class AuthController {
     @Request() req,
     @Res({ passthrough: true }) response: Response,
   ): Promise<SigninResponse> {
-    const { tokens, cookie } = await this.authService.signin(req.user);
+    const { accessToken, refreshToken, cookie, wallet } =
+      await this.authService.signin(req.user);
 
     response.cookie('Authorization', cookie, {
       httpOnly: true,
@@ -71,7 +72,10 @@ export class AuthController {
       secure: true,
     });
 
-    return { message: 'Signin successfully', data: tokens };
+    return {
+      message: 'Signin successfully',
+      data: { accessToken, refreshToken, wallet },
+    };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -116,7 +120,9 @@ export class AuthController {
       );
     return {
       message: 'New access token  successfully created',
-      data: { accessToken },
+      data: {
+        accessToken,
+      },
     };
   }
 }

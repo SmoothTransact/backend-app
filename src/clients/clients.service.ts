@@ -63,6 +63,12 @@ export class ClientsService {
     return client;
   }
 
+  async getClientByEmailAndUserId(email: string, userId: string): Promise<ClientProfile> {
+    return this.clientRepository.findOne({
+      where: { user: { id: userId }, email: email },
+    });
+  }
+
   async getClientByIdAndUserId(
     clientId: string,
     userId: string,

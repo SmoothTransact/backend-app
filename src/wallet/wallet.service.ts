@@ -71,4 +71,21 @@ export class WalletService {
       throw new Error('Failed to retrieve wallet balance');
     }
   }
+
+  async getWalletDetails(userId: string): Promise<Wallet> {
+    try {
+      const wallet = await this.walletRepository.findOne({
+        where: { user: { id: userId } },
+      });
+
+      if (!wallet) {
+        throw new NotFoundException('User wallet not found');
+      }
+
+      return wallet;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to retrieve wallet details');
+    }
+  }
 }
