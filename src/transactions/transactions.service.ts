@@ -22,7 +22,7 @@ export class TransactionsService {
   async createTransaction(
     createTransactionDto: CreateTransactionDto,
     userId: string,
-    clientId: string,
+    clientId: string | null,
   ): Promise<Transaction> {
     try {
       const { invoiceId, amount, status } = createTransactionDto;
@@ -43,7 +43,7 @@ export class TransactionsService {
         amount,
         status,
         user: { id: userId },
-        client: { id: clientId },
+        client: clientId ? { id: clientId } : null,
       } as DeepPartial<Transaction>);
 
       await this.transactionRepository.save(newTransaction);

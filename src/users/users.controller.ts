@@ -11,6 +11,9 @@ import { Request } from 'express';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Roles } from './decorators/roles.decorator';
+// import { RolesGuard } from './guards/roles.guard';
+// import { ROLES } from './types/user.types';
 
 @Controller('users')
 export class UsersController {
@@ -30,9 +33,19 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @Roles('ADMIN')
   findAll(): Promise<User[]> {
-    return this.usersService.findAll();
-  }
+    throw new HttpException(
+      {
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'Not Found',
+        message:
+        "This endpoint does not exist",
+      },
+      HttpStatus.NOT_FOUND,
+      );
+    }
 
   @Get('/stats')
   stats(): Promise<{ NumberOfUsers: number }> {

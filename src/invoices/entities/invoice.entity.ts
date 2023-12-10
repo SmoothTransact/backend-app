@@ -28,6 +28,9 @@ export class Invoice {
   @Column({ nullable: true })
   paymentReference: string;
 
+  @Column({ type: 'date', nullable: true })
+  dueDate: Date;
+
   @ManyToOne(() => User, (user) => user.invoices)
   user: User;
 

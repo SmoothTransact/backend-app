@@ -9,6 +9,7 @@ import {
   UseGuards,
   NotFoundException,
   Req,
+  Query,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { InvoicesService } from './invoices.service';
@@ -21,27 +22,30 @@ export class InvoiceController {
   constructor(private readonly invoiceService: InvoicesService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post(':clientId')
+  @Post()
   async createInvoice(
     @Req() req: Request,
     @Body() createInvoiceDto: CreateInvoiceDto,
-    @Param('clientId') clientId: string,
+    @Query('clientId') clientId?: string,
   ): Promise<any> {
     try {
       const userId = (req.user as any).user.id;
-
+  
       const createdInvoice = await this.invoiceService.createInvoice(
         createInvoiceDto,
         userId,
         clientId,
+        createInvoiceDto.clientId ? undefined : {
+          fullName: createInvoiceDto.clientFullName,
+          email: createInvoiceDto.clientEmail,
+          phone: createInvoiceDto.clientPhone,
+        },
       );
-
-      // Generate Paystack link after creating the invoice
+  
       const paymentLink = await this.invoiceService.generatePaystackLink(
         createdInvoice.invoice.id,
       );
-
-      // You can now send the paymentLink to the client
+  
       return { invoice: createdInvoice, paymentLink };
     } catch (error) {
       console.error(error);

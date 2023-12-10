@@ -1,5 +1,6 @@
 // invoices/invoices.service.ts
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   Inject,
@@ -16,6 +17,8 @@ import { PaystackService } from '../paystack/paystack.service';
 import { ClientsService } from 'src/clients/clients.service';
 import { Transaction } from 'src/transactions/entities/transactions.entity';
 import { WalletService } from 'src/wallet/wallet.service';
+import { ClientProfile } from 'src/clients/entities/client.entity';
+import { CreateClientProfileDto } from 'src/clients/dto/create-client.dto';
 
 @Injectable()
 export class InvoicesService {
@@ -33,23 +36,50 @@ export class InvoicesService {
   async createInvoice(
     createInvoiceDto: CreateInvoiceDto,
     userId: string,
-    clientId: string,
+    clientId: string | null,
+    createClientDto?: CreateClientProfileDto,
   ): Promise<{ invoice: Invoice; transaction: Transaction }> {
     try {
-      await this.clientsService.getClientByIdAndUserId(clientId, userId);
+      let client: ClientProfile;
+  
+      if (clientId) {
+        client = await this.clientsService.getClientByIdAndUserId(
+          clientId,
+          userId,
+        );
+      } else if (createClientDto) {
+        const existingClient = await this.clientsService.getClientByEmailAndUserId(
+          createClientDto.email,
+          userId,
+        );
+  
+        if (existingClient) {
+          throw new ConflictException('Client profile already exists');
+        }
+        const newClient = await this.clientsService.createClientProfile(
+          userId,
+          createClientDto,
+        );
+  
+        client = newClient;
+        clientId = newClient.id;
+      }
+  
+      const { description, amount, dueDate } = createInvoiceDto;
 
-      const { description, amount } = createInvoiceDto;
-
+      const newAmount = amount * 100;
+  
       const newInvoice = this.invoiceRepository.create({
         description,
-        amount,
+        amount: newAmount,
+        dueDate: new Date(dueDate),
         status: 'unpaid',
         user: { id: userId },
-        client: { id: clientId },
+        client: { id: client.id },
       } as DeepPartial<Invoice>);
-
+  
       const savedInvoice = await this.invoiceRepository.save(newInvoice);
-
+  
       const transaction = await this.transactionsService.createTransaction(
         {
           invoiceId: savedInvoice.id,
@@ -59,7 +89,7 @@ export class InvoicesService {
         userId,
         clientId,
       );
-
+  
       return { invoice: savedInvoice, transaction };
     } catch (error) {
       console.error(error);
@@ -68,7 +98,7 @@ export class InvoicesService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }
+  }  
 
   async getInvoiceDetails(invoiceId: string): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findOne({

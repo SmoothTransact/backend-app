@@ -83,7 +83,15 @@ export class AuthService {
     const [accessToken, refreshToken] = await this.getTokens(user);
     const cookieSerialized = this.setCookies(accessToken);
     await this.setCurrentRefreshToken(refreshToken, user.id);
-    return { tokens: { accessToken, refreshToken }, cookie: cookieSerialized };
+
+    const wallet = await this.walletService.getWalletDetails(user.id);
+
+    return {
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      cookie: cookieSerialized,
+      wallet: wallet,
+    };
   }
 
   async signout(reqUser: Partial<User>, token: string): Promise<boolean> {
