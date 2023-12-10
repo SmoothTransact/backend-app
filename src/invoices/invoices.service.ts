@@ -65,14 +65,13 @@ export class InvoicesService {
         clientId = newClient.id;
       }
   
-      console.log(client);
-      console.log(userId);
-  
       const { description, amount, dueDate } = createInvoiceDto;
+
+      const newAmount = amount * 100;
   
       const newInvoice = this.invoiceRepository.create({
         description,
-        amount,
+        amount: newAmount,
         dueDate: new Date(dueDate),
         status: 'unpaid',
         user: { id: userId },

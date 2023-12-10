@@ -39,12 +39,12 @@ export class WalletService {
           throw new NotFoundException('User wallet not found');
         }
 
-        newWallet.balance.amount += amount;
+        newWallet.balance.amount += amount / 100;
 
         await this.walletRepository.save(newWallet);
         console.log('Wallet balance updated successfully');
       } else {
-        wallet.balance.amount += amount;
+        wallet.balance.amount += amount / 100;
 
         await this.walletRepository.save(wallet);
         console.log('Wallet balance updated successfully');
