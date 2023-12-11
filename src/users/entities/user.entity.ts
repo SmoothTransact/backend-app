@@ -15,6 +15,7 @@ import { Alert } from '../../alerts/entities/alert.entity';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Invoice } from 'src/invoices/entities/invoice.entity';
 import { Transaction } from 'src/transactions/entities/transactions.entity';
+import { Account } from 'src/accounts/entities/account.entity';
 
 @Entity({ name: 'user' })
 export class User {
@@ -56,6 +57,9 @@ export class User {
 
   @OneToMany(() => Alert, (alert) => alert.user, { cascade: true })
   alerts: Alert[];
+
+  @OneToMany(() => Account, (account) => account.user)
+  accounts: Account[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

@@ -38,21 +38,26 @@ export class InvoicesService {
     userId: string,
     clientId: string | null,
     createClientDto?: CreateClientProfileDto,
-  ): Promise<{ invoice: Invoice; transaction: Transaction }> {
+  ): Promise<{
+    invoice: Invoice;
+    transaction: Transaction;
+    clientDetails: ClientProfile;
+  }> {
     try {
       let client: ClientProfile;
-  
+
       if (clientId) {
         client = await this.clientsService.getClientByIdAndUserId(
           clientId,
           userId,
         );
       } else if (createClientDto) {
-        const existingClient = await this.clientsService.getClientByEmailAndUserId(
-          createClientDto.email,
-          userId,
-        );
-  
+        const existingClient =
+          await this.clientsService.getClientByEmailAndUserId(
+            createClientDto.email,
+            userId,
+          );
+
         if (existingClient) {
           throw new ConflictException('Client profile already exists');
         }
@@ -60,15 +65,15 @@ export class InvoicesService {
           userId,
           createClientDto,
         );
-  
+
         client = newClient;
         clientId = newClient.id;
       }
-  
+
       const { description, amount, dueDate } = createInvoiceDto;
 
       const newAmount = amount * 100;
-  
+
       const newInvoice = this.invoiceRepository.create({
         description,
         amount: newAmount,
@@ -77,9 +82,9 @@ export class InvoicesService {
         user: { id: userId },
         client: { id: client.id },
       } as DeepPartial<Invoice>);
-  
+
       const savedInvoice = await this.invoiceRepository.save(newInvoice);
-  
+
       const transaction = await this.transactionsService.createTransaction(
         {
           invoiceId: savedInvoice.id,
@@ -89,8 +94,8 @@ export class InvoicesService {
         userId,
         clientId,
       );
-  
-      return { invoice: savedInvoice, transaction };
+
+      return { invoice: savedInvoice, transaction, clientDetails: client };
     } catch (error) {
       console.error(error);
       throw new HttpException(
@@ -98,7 +103,7 @@ export class InvoicesService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }  
+  }
 
   async getInvoiceDetails(invoiceId: string): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findOne({
@@ -170,5 +175,10 @@ export class InvoicesService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  private extractReferenceFromUrl(url: string): string {
+    const parts = url.split('/');
+    return parts[parts.length - 1];
   }
 }

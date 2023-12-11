@@ -124,4 +124,90 @@ export class PaystackService {
       );
     }
   }
+
+  async getBankList(): Promise<any> {
+    const options: https.RequestOptions = {
+      hostname: 'api.paystack.co',
+      port: 443,
+      path: '/bank',
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${this.secretKey}`,
+      },
+    };
+
+    try {
+      return await this.makeRequest(options);
+    } catch (error) {
+      throw new HttpException(
+        'Error fetching bank list from Paystack',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async resolveAccountNumber(
+    accountNumber: string,
+    bankCode: string,
+  ): Promise<any> {
+    const options: https.RequestOptions = {
+      hostname: 'api.paystack.co',
+      port: 443,
+      path: `/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${this.secretKey}`,
+      },
+    };
+
+    try {
+      const response = await this.makeRequest(options);
+      if (response.status && response.status === true && response.data) {
+        return response.data;
+      } else {
+        throw new HttpException(
+          'Error resolving account number on Paystack',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to resolve and save account details',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getBankCode(bankName: string): Promise<string> {
+    const options: https.RequestOptions = {
+      hostname: 'api.paystack.co',
+      port: 443,
+      path: '/bank',
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${this.secretKey}`,
+      },
+    };
+
+    try {
+      const response = await this.makeRequest(options);
+      const bankList = response.data || [];
+      const selectedBank = bankList.find(
+        (bank: { name: string }) =>
+          bank.name.toLowerCase() === bankName.toLowerCase(),
+      );
+
+      if (!selectedBank) {
+        throw new HttpException('Bank not found', HttpStatus.NOT_FOUND);
+      }
+
+      return selectedBank.code;
+    } catch (error) {
+      throw new HttpException(
+        'Error fetching bank list from Paystack',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

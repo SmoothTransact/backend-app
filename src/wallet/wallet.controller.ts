@@ -1,42 +1,25 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Req, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { WalletService } from './wallet.service';
 
 @Controller('wallet')
-export class WalletController {}
+export class WalletController {
+  constructor(private readonly walletService: WalletService) {}
 
-// // paystack/paystack.controller.ts
-// import { Controller, Post, Body } from '@nestjs/common';
-// import { PaystackService } from './paystack.service';
+  @UseGuards(JwtAuthGuard)
+  @Get('balance')
+  async getBalance(@Req() req: Request): Promise<number> {
+    const userId = (req.user as any).user.id;
+    const balance = await this.walletService.getWalletBalance(userId);
+    return balance;
+  }
 
-// @Controller('paystack')
-// export class PaystackController {
-//   constructor(private readonly paystackService: PaystackService) {}
-
-//   @Post('initiate-payment')
-//   async initiatePayment(
-//     @Body() body: { email: string; amount: number },
-//   ): Promise<any> {
-//     try {
-//       const paymentLink = await this.paystackService.initiatePayment(
-//         body.email,
-//         body.amount,
-//       );
-//       return { paymentLink };
-//     } catch (error) {
-//       console.error(error);
-//       return { error: 'Failed to initiate payment' };
-//     }
-//   }
-
-//   @Post('verify-payment')
-//   async verifyPayment(@Body() body: { reference: string }): Promise<any> {
-//     try {
-//       const paymentDetails = await this.paystackService.verifyPayment(
-//         body.reference,
-//       );
-//       return { paymentDetails };
-//     } catch (error) {
-//       console.error(error);
-//       return { error: 'Failed to verify payment' };
-//     }
-//   }
-// }
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async getDetails(@Req() req: Request): Promise<any> {
+    const userId = (req.user as any).user.id;
+    const wallet = await this.walletService.getWalletDetails(userId);
+    return wallet;
+  }
+}

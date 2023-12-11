@@ -30,22 +30,24 @@ export class InvoiceController {
   ): Promise<any> {
     try {
       const userId = (req.user as any).user.id;
-  
+
       const createdInvoice = await this.invoiceService.createInvoice(
         createInvoiceDto,
         userId,
         clientId,
-        createInvoiceDto.clientId ? undefined : {
-          fullName: createInvoiceDto.clientFullName,
-          email: createInvoiceDto.clientEmail,
-          phone: createInvoiceDto.clientPhone,
-        },
+        createInvoiceDto.clientId
+          ? undefined
+          : {
+              fullName: createInvoiceDto.clientFullName,
+              email: createInvoiceDto.clientEmail,
+              phone: createInvoiceDto.clientPhone,
+            },
       );
-  
+
       const paymentLink = await this.invoiceService.generatePaystackLink(
         createdInvoice.invoice.id,
       );
-  
+
       return { invoice: createdInvoice, paymentLink };
     } catch (error) {
       console.error(error);
