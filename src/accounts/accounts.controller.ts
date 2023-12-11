@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AccountsService } from './accounts.service';
@@ -23,6 +23,17 @@ export class AccountsController {
     return {
       message: 'Account added successfully',
       data: account,
+    };
+  }
+
+  @Get()
+  async getAccountDetails(@Req() req: Request): Promise<any> {
+    const userId = (req.user as any).user.id;
+    const accountDetails =
+      await this.accountsService.getUserAccountDetails(userId);
+
+    return {
+      accountDetails,
     };
   }
 }

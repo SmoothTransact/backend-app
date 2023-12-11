@@ -57,4 +57,10 @@ export class AccountsService {
 
     return savedAccount;
   }
+
+  async getUserAccountDetails(userId: string): Promise<Account[]> {
+    return this.accountRepository.find({
+      where: { user: { id: userId } },
+    });
+  }
 }
