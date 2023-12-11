@@ -12,6 +12,7 @@ import { PaystackModule } from './paystack/paystack.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { NotificationServiceModule } from './notification-service/notification-service.module';
 import { WalletModule } from './wallet/wallet.module';
+import { AccountsModule } from './accounts/accounts.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -34,6 +35,7 @@ import configuration from './config/configuration';
     WalletModule,
     TransactionsModule,
     InvoicesModule,
+    AccountsModule,
   ],
   providers: [],
   controllers: [],

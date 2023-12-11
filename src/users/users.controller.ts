@@ -40,12 +40,11 @@ export class UsersController {
       {
         statusCode: HttpStatus.NOT_FOUND,
         error: 'Not Found',
-        message:
-        "This endpoint does not exist",
+        message: 'This endpoint does not exist',
       },
       HttpStatus.NOT_FOUND,
-      );
-    }
+    );
+  }
 
   @Get('/stats')
   stats(): Promise<{ NumberOfUsers: number }> {
