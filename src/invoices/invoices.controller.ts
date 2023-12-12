@@ -16,10 +16,14 @@ import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dtos/invoice.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Invoice } from './entities/invoice.entity';
+import { MailgunService } from 'src/mailgun/mailgun.service';
 
 @Controller('invoices')
 export class InvoiceController {
-  constructor(private readonly invoiceService: InvoicesService) {}
+  constructor(
+    private readonly invoiceService: InvoicesService,
+    private mailgunService: MailgunService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -46,6 +50,17 @@ export class InvoiceController {
 
       const paymentLink = await this.invoiceService.generatePaystackLink(
         createdInvoice.invoice.id,
+      );
+
+      const amountInCents = createdInvoice.invoice.amount;
+      const amountInNaira = (amountInCents / 100).toString();
+
+      await this.mailgunService.sendInvoicePaymentEmail(
+        createdInvoice.clientDetails.email,
+        createdInvoice.clientDetails.fullName,
+        createdInvoice.invoice.description,
+        amountInNaira,
+        paymentLink,
       );
 
       return { invoice: createdInvoice, paymentLink };

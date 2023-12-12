@@ -133,4 +133,74 @@ export class MailgunService {
     const info = await transporter.sendMail(mailOptions);
     return info.response;
   }
+
+  async sendInvoicePaymentEmail(
+    to: string,
+    username: string,
+    description: string,
+    amount: string,
+    paymentLink: string,
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const accessToken = await this.oauth2Client.getAccessToken();
+
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      auth: {
+        type: 'OAuth2',
+        user: this.userMail,
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        refreshToken: this.refreshToken,
+      },
+    });
+
+    const mailGenerator = new Mailgen({
+      theme: 'default',
+      product: {
+        name: 'Smooth Transact',
+        link: 'https://smooth-transact.netlify.app',
+        logo: '../../src/mailgun/assets/Logo.png',
+      },
+    });
+
+    const emailContent = {
+      body: {
+        name: username,
+        dictionary: {
+          Description: description,
+          Amount: amount,
+        },
+        action: [
+          {
+            instructions:
+              'You received this email because you have an unpaid invoice with the details above:',
+            button: {
+              text: 'Invoice Details Above 🔼',
+              link: '',
+            },
+          },
+          {
+            instructions: 'Click on the link below to pay for the invoice',
+            button: {
+              text: 'Pay for Invoice',
+              link: paymentLink,
+            },
+          },
+        ],
+      },
+    };
+
+    const emailHtml = mailGenerator.generate(emailContent);
+
+    const mailOptions = {
+      from: 'Ahmed from Smooth Transact <contact@ahmedolawale.me>',
+      to: to,
+      subject: 'Invoice Payment Request from Smooth Transact',
+      html: emailHtml,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return info.response;
+  }
 }
